@@ -46,8 +46,12 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+
     runtimeOnly("org.postgresql:postgresql")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.9.2")
+
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
     implementation("com.fasterxml.jackson.core:jackson-core:2.18.3")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
@@ -57,6 +61,13 @@ dependencies {
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.0")
     implementation("org.slf4j:slf4j-api:2.0.16")
+
+    // Avro Parsing
+    implementation("org.apache.avro:avro:1.12.0")
+    implementation("io.confluent:kafka-avro-serializer:7.9.0")
+    implementation("io.confluent:kafka-json-schema-serializer:7.4.0")
+
+
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

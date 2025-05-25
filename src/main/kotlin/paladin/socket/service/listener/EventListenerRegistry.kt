@@ -1,4 +1,4 @@
-package paladin.router.services.listener
+package paladin.socket.service.listener
 
 import io.github.oshai.kotlinlogging.KLogger
 import org.springframework.boot.ApplicationArguments
@@ -8,14 +8,13 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.kafka.listener.MessageListener
 import org.springframework.stereotype.Service
-import paladin.router.exceptions.ActiveListenerException
-import paladin.router.exceptions.ListenerNotFoundException
-import paladin.router.models.listener.EventListener
-import paladin.router.models.listener.ListenerRegistrationRequest
-import paladin.router.repository.EventListenerRepository
-import paladin.router.services.dispatch.DispatchService
-import paladin.router.util.factory.ConsumerConfigFactory
-import paladin.router.util.factory.EntityFactory.toEntity
+import paladin.socket.exceptions.ActiveListenerException
+import paladin.socket.exceptions.ListenerNotFoundException
+import paladin.socket.model.listener.ListenerRegistrationRequest
+import paladin.socket.model.listener.EventListener
+import paladin.socket.model.listener.EventListener.Companion.toEntity
+import paladin.socket.repository.EventListenerRepository
+import paladin.socket.util.factory.ConsumerConfigFactory
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
@@ -23,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap
 class EventListenerRegistry(
     private val kafkaConsumerFactory: DefaultKafkaConsumerFactory<Any, Any>,
     private val eventListenerRepository: EventListenerRepository,
-    private val dispatchService: DispatchService,
     private val logger: KLogger
 ) : ApplicationRunner {
     private val listeners = ConcurrentHashMap<String, EventListener>()
@@ -53,7 +51,6 @@ class EventListenerRegistry(
                         key = entity.keyFormat,
                         value = entity.valueFormat,
                         config = entity.consumerProperties,
-                        dispatchService = dispatchService
                     )
 
                     listeners[entity.topic] = listener
@@ -120,7 +117,6 @@ class EventListenerRegistry(
                     groupId = request.groupId,
                     key = request.key,
                     value = request.value,
-                    dispatchService = dispatchService,
                     config = request.config,
                     runOnStartup = request.runOnStartup
                 )
@@ -160,7 +156,7 @@ class EventListenerRegistry(
         }
 
         listeners.remove(topic).also {
-            dispatchService.removeSourceTopic(topic)
+            //todo Handle listener removal from websockets
         }
     }
 
