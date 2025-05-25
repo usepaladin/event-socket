@@ -5,7 +5,7 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.*
 import org.hibernate.annotations.Type
 import paladin.socket.enums.configuration.Broker
-import paladin.router.models.listener.AdditionalConsumerProperties
+import paladin.socket.model.listener.AdditionalConsumerProperties
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -13,7 +13,7 @@ import java.util.*
 @Entity
 @Table(
     name = "event_listener",
-    schema = "event_routing",
+    schema = "event_socket",
     uniqueConstraints = [
         UniqueConstraint(columnNames = ["topic_name"])
     ],

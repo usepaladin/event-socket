@@ -1,5 +1,6 @@
-package paladin.router.exceptions.handler
+package paladin.socket.exceptions.handler
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -11,6 +12,10 @@ import java.io.StringWriter
 
 @ControllerAdvice
 class GlobalExceptionHandler {
+
+    @Value("\${paladin.includeStackTrace:false}")
+    private var includeStackTrace: Boolean = false
+
     fun appendStackTraceToCustomError(ex: Throwable, err: ErrorResponse): Unit {
         val stringWriter = StringWriter()
         ex.printStackTrace(PrintWriter(stringWriter))

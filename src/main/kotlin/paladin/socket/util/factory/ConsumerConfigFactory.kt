@@ -14,14 +14,15 @@ object ConsumerConfigFactory {
         config: MutableMap<String, Any>,
         eventListener: EventListener
     ): Triple<Map<String, Any>, Deserializer<*>, Deserializer<*>> {
-        val keyDeserializer: ErrorHandlingDeserializer<*> =
-            generateDeserializer(eventListener.key, eventListener.config.schemaRegistryUrl, true)
-        val valueDeserializer = generateDeserializer(eventListener.value, eventListener.config.schemaRegistryUrl)
-
         // Assert Schema registry exists if Avro is used, otherwise throw
         if (eventListener.config.schemaRegistryUrl.isNullOrEmpty() && (eventListener.value == Broker.ProducerFormat.AVRO || eventListener.key == Broker.ProducerFormat.AVRO)) {
             throw IllegalArgumentException("Schema Registry URL is required for AVRO format")
         }
+        
+        val keyDeserializer: ErrorHandlingDeserializer<*> =
+            generateDeserializer(eventListener.key, eventListener.config.schemaRegistryUrl, true)
+        val valueDeserializer = generateDeserializer(eventListener.value, eventListener.config.schemaRegistryUrl)
+
 
         eventListener.config.schemaRegistryUrl?.let {
             config["schema.registry.url"] = it
@@ -38,14 +39,13 @@ object ConsumerConfigFactory {
                 ConsumerConfig.MAX_POLL_RECORDS_CONFIG to eventListener.config.maxPollRecords,
                 ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to eventListener.config.maxPollIntervalMs,
                 ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG to eventListener.config.sessionTimeoutMs,
-                ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG to eventListener.config.requestTimeoutMs,
                 ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG to eventListener.config.autoCommitIntervalMs,
             )
         )
 
         // Set the deserializers in the configuration
-        config[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = keyDeserializer
-        config[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = valueDeserializer
+        config[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = keyDeserializer.javaClass.name
+        config[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = valueDeserializer.javaClass.name
 
         return Triple(
             config,
@@ -66,38 +66,27 @@ object ConsumerConfigFactory {
         val baseDeserializer = when (format) {
             Broker.ProducerFormat.STRING -> org.apache.kafka.common.serialization.StringDeserializer()
             Broker.ProducerFormat.JSON -> {
-                schemaRegistryUrl.let {
-                    if (it.isNullOrEmpty()) return@let io.confluent.kafka.serializers.KafkaJsonDeserializer<Any>()
-                    // If schema registry URL is provided, use KafkaJsonDeserializer
-                    return@let io.confluent.kafka.serializers.json.KafkaJsonSchemaDeserializer<Any>().apply {
+                if (schemaRegistryUrl.isNullOrEmpty()) {
+                    io.confluent.kafka.serializers.KafkaJsonDeserializer<Any>()
+                } else {
+                    io.confluent.kafka.serializers.json.KafkaJsonSchemaDeserializer<Any>().apply {
                         configure(
-                            mapOf(
-                                "schema.registry.url" to schemaRegistryUrl,
-                                "specific.avro.reader" to true
-                            ), isKey
+                            mapOf("schema.registry.url" to schemaRegistryUrl),
+                            isKey
                         )
                     }
                 }
             }
 
             Broker.ProducerFormat.AVRO -> {
-                // Check if schema registry URL is provided
-                schemaRegistryUrl.let {
-                    if (it.isNullOrEmpty()) {
-                        throw IllegalArgumentException("Schema Registry URL is required for AVRO format")
-                    }
-
-                    io.confluent.kafka.serializers.KafkaAvroDeserializer().apply {
-                        configure(
-                            mapOf(
-                                "schema.registry.url" to schemaRegistryUrl,
-                                "specific.avro.reader" to true
-                            ), isKey
-                        )
-                    }
+                io.confluent.kafka.serializers.KafkaAvroDeserializer().apply {
+                    configure(
+                        mapOf(
+                            "schema.registry.url" to schemaRegistryUrl,
+                            "specific.avro.reader" to true
+                        ), isKey
+                    )
                 }
-
-
             }
         }
 

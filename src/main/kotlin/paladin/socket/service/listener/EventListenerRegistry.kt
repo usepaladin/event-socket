@@ -1,6 +1,7 @@
 package paladin.socket.service.listener
 
 import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
@@ -22,8 +23,10 @@ import java.util.concurrent.ConcurrentHashMap
 class EventListenerRegistry(
     private val kafkaConsumerFactory: DefaultKafkaConsumerFactory<Any, Any>,
     private val eventListenerRepository: EventListenerRepository,
-    private val logger: KLogger
+
 ) : ApplicationRunner {
+    private val logger: KLogger = KotlinLogging.logger {  }
+
     private val listeners = ConcurrentHashMap<String, EventListener>()
     private val activeContainers = ConcurrentHashMap<String, KafkaMessageListenerContainer<*, *>>()
 

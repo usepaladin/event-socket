@@ -1,6 +1,5 @@
 package paladin.socket.model.listener
 
-import paladin.router.models.listener.AdditionalConsumerProperties
 import paladin.socket.enums.configuration.Broker
 import java.io.Serializable
 

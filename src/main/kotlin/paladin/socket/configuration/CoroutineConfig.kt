@@ -19,21 +19,21 @@ class CoroutineConfig {
 
     @Value("\${paladin.coroutine.pool-size:10}")
     private val poolSize: Int = 10
-
-
-    private val dispatcher: ExecutorCoroutineDispatcher = Executors.newFixedThreadPool(poolSize) { runnable ->
-        val thread = Thread(runnable, "coroutine-thread-${UUID.randomUUID()}").apply {
-            isDaemon = true
-        }
-        thread
-    }.asCoroutineDispatcher()
+    private lateinit var dispatcher: ExecutorCoroutineDispatcher
 
     /**
      * Provides a coroutine dispatcher backed by a fixed thread pool.
      * @return The coroutine dispatcher for dependency injection
      */
     @Bean
-    fun coroutineDispatcher(): CoroutineDispatcher = dispatcher
+    fun coroutineDispatcher(): CoroutineDispatcher{
+        return Executors.newFixedThreadPool(poolSize) { runnable ->
+            val thread = Thread(runnable, "coroutine-thread-${UUID.randomUUID()}").apply {
+                isDaemon = true
+            }
+            thread
+        }.asCoroutineDispatcher()
+    }
 
     /**
      * Closes the coroutine dispatcher when the application context is destroyed.
