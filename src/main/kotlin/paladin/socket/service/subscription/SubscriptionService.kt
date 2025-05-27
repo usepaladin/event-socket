@@ -6,10 +6,8 @@ import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
-import paladin.socket.model.subscription.EventSubscription
 import paladin.socket.service.event.EventFilteringService
 import paladin.socket.service.listener.EventListenerRegistry
-import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class SubscriptionService(
@@ -19,7 +17,6 @@ class SubscriptionService(
     private val eventFilteringService: EventFilteringService
 ) : TextWebSocketHandler() {
     private val logger = KotlinLogging.logger {}
-    private val topicSubscriptions = ConcurrentHashMap<String, MutableSet<EventSubscription>>()
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
         logger.info { "Connection established for session ${session.id}" }

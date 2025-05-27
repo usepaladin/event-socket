@@ -61,4 +61,14 @@ class GlobalExceptionHandler {
         return handleException(ex, HttpStatus.NOT_FOUND, true)
     }
 
+    @ExceptionHandler(ClientNotFoundException::class)
+    fun handleClientNotFoundException(ex: ClientNotFoundException): ResponseEntity<ErrorResponse> {
+        return handleException(ex, HttpStatus.NOT_FOUND, true)
+    }
+
+    @ExceptionHandler(TopicNotFoundException::class)
+    fun handleTopicNotFoundException(ex: TopicNotFoundException): ResponseEntity<ErrorResponse> {
+        return handleException(ex, HttpStatus.NOT_FOUND, true)
+    }
+
 }
